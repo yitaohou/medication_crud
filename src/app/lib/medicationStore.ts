@@ -1,38 +1,7 @@
 import { MedicationInput, Medication } from "../types";
 import { calculateRefillDate } from "../utils";
 
-// const sampleMedications: Medication[] = [{
-//     id: 1,
-//     name: 'Sample Medication',
-//     dosage: '10mg',
-//     frequency: {
-//         times: 2,
-//         per: 1,
-//     },
-//     dosageTotal: 30,
-//     dosageRemaining: 20,
-//     dosageMissed: 5,
-//     startDate: new Date().toISOString(),
-//     createdAt: new Date().toISOString(),
-// }, {
-//     id: 2,
-//     name: 'Sample Medication',
-//     dosage: '10mg',
-//     frequency: {
-//         times: 1,
-//         per: 1,
-//     },
-//     dosageTotal: 15,
-//     dosageRemaining: 10,
-//     dosageMissed: 5,
-//     startDate: new Date().toISOString(),
-//     createdAt: new Date().toISOString(),
-// }];
-
 class MedicationStore {
-    // private medications: Medication[] = sampleMedications;
-    // private nextId: number = 3;  //change it manually given the sampleMedication
-
     private medications: Medication[] = [];
     private nextId: number = 1;
 
@@ -65,7 +34,7 @@ class MedicationStore {
         const dosageMissed = updates.dosageMissed || currentMedication.dosageMissed;
         const dosageTotal = updates.dosageTotal || currentMedication.dosageTotal;
         const frequency = updates.frequency || currentMedication.frequency;
-        
+
         const refillDate = calculateRefillDate(startDate, dosageMissed, dosageTotal, frequency.times, frequency.per);
         this.medications[index] = {
             ...this.medications[index],
@@ -86,10 +55,10 @@ class MedicationStore {
     getExpiringSoon(days: number = 7): Medication[] {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
+
         const futureDate = new Date(today);
         futureDate.setDate(futureDate.getDate() + days);
-        
+
         return this.medications
             .filter(med => {
                 const refillDate = new Date(med.refillDate);
@@ -109,6 +78,19 @@ class MedicationStore {
             .sort((a, b) => {
                 return new Date(a.refillDate).getTime() - new Date(b.refillDate).getTime();
             });
+    }
+
+    clear(): void { 
+        this.medications = [];
+        this.nextId = 1;
+    }
+
+    restore(medication: Medication): void {
+        this.medications.push(medication);
+
+        if (medication.id >= this.nextId) {
+            this.nextId = medication.id + 1;
+        }
     }
 }
 

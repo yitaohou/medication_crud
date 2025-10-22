@@ -151,7 +151,6 @@ export function formatMedicationsForExport(medications: Medication[]): string[][
 }
 
 //TODOS:
-//11. use the local storage to store the medications
 //12. responsive design
 // summary of 10-13: bonus features
 //13. testing the export functionality and simplify the code in the component
@@ -162,6 +161,9 @@ export function formatMedicationsForExport(medications: Medication[]): string[][
 //19. do the enum type for 'expired' | 'ending-soon' | 'normal'
 //20. do the re-fetch for the expiring and expired EP after editing/add medication
 //21. do the re-fetch for the expiring and expired EP after deleting medication
+//22. clear the modal next time opening it
+//23. fix the not showing detail button when no notes
+//24. change the name to truncate
 
 // summary of 14-19: clean up and optimization
 //24. do the dosage condition?
@@ -183,3 +185,4 @@ export function formatMedicationsForExport(medications: Medication[]): string[][
 //16.(done) using debounce for the search
 //23.(wont do) change the EP to light weight
 //13.(done) export the schedule to a csv/pdf file
+//11.(done) use the local storage to store the medications

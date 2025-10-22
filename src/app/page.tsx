@@ -1,3 +1,4 @@
+import LocalStorageSync from "./components/LocalStorageSync";
 import ActionButtons from "./components/medication/ActionButtons";
 import AddMedicationButton from "./components/medication/AddMedicationButton";
 import DeleteMedicationButton from "./components/medication/DeleteMedicationButton";
@@ -29,6 +30,8 @@ export default async function Home() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
+      <LocalStorageSync medications={medications} />
+      
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Medications</h1>
         <ExportButton medications={medications} />
