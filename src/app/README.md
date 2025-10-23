@@ -44,10 +44,11 @@ npm run dev
 
 ## TODO
 
-- bug-to-be-fixed: editing the medication after hitting 'take' or 'miss' is broken
+- adding reset today's take/miss functionality
 - responsive design
 - do the dosage condition for each day? e.g. 3 times per day medication, then the user is able to mark any of them as taken or missed
 - migration to the tanstack query
+- validation checks for modification EP?
 
 ## API Endpoints
 

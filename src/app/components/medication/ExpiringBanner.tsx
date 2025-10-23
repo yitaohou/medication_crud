@@ -1,16 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Medication } from '@/app/types';
+import { MedicationSummary } from '@/app/types';
 import ExpiringMedicationsModal from '@/app/components/medication/ExpiringMedicationModal';
 import { medicationEvents } from '@/app/lib/medicationEvents';
-
-type MedicationWithDays = Medication & {
-    daysRemaining: number;  
-};
+import { DEFAULT_EXPIRING_DAYS } from '@/app/const';
 
 export default function ExpiringBanner() {
-    const [data, setData] = useState<{ medications: MedicationWithDays[], count: number, message: string } | null>(null);
+    const [data, setData] = useState<MedicationSummary[] | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
@@ -34,7 +31,7 @@ export default function ExpiringBanner() {
         };
     }, []);
 
-    if (!data || data.count === 0) {
+    if (!data || data.length === 0) {
         return null;
     }
 
@@ -44,10 +41,10 @@ export default function ExpiringBanner() {
                 <div className="flex justify-between items-center">
                     <div>
                         <strong className="text-yellow-800">⚠️ Alert:</strong>
-                        <span className="ml-2 text-yellow-700">{data.message}</span>
+                        <span className="ml-2 text-yellow-700">{data.length} medication{data.length !== 1 ? 's are' : ' is'} expiring within {DEFAULT_EXPIRING_DAYS} days</span>
                     </div>
-                    {data.count > 0 && (
-                        <button 
+                    {data.length > 0 && (
+                        <button
                             onClick={() => setIsModalOpen(true)}
                             className="text-button text-yellow-800 hover:text-yellow-900"
                         >
@@ -59,7 +56,7 @@ export default function ExpiringBanner() {
             <ExpiringMedicationsModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                medications={data.medications}
+                medicationSummaries={data}
             />
         </>
     );

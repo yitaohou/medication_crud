@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import ExpiredMedicationsModal from '@/app/components/medication/ExpiredMedicationsModal';
-import { Medication } from '@/app/types';
+import { MedicationSummary } from '@/app/types';
 import { medicationEvents } from '@/app/lib/medicationEvents';
 
 export default function ExpiredBanner() {
-    const [data, setData] = useState<{ medications: Medication[], count: number, message: string } | null>(null);
+    const [data, setData] = useState<MedicationSummary[] | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
@@ -30,7 +30,7 @@ export default function ExpiredBanner() {
         };
     }, []);
 
-    if (!data || data.count === 0) {
+    if (!data || data.length === 0) {
         return null;
     }
 
@@ -40,7 +40,7 @@ export default function ExpiredBanner() {
                 <div className="flex justify-between items-center">
                     <div>
                         <strong className="text-red-800">🚨 Alert:</strong>
-                        <span className="ml-2 text-red-700">{data.message}</span>
+                        <span className="ml-2 text-red-700">{data.length} medication{data.length !== 1 ? 's have' : ' has'} expired</span>
                     </div>
                     <button
                         onClick={() => setIsModalOpen(true)}
@@ -53,7 +53,7 @@ export default function ExpiredBanner() {
             <ExpiredMedicationsModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                medications={data.medications}
+                medicationSummaries={data}
             />
         </>
     );

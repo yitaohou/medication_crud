@@ -19,6 +19,12 @@ export enum ModalMode {
     EDIT = 'edit'
 }
 
+export type LastDayAction = {
+    date: string;
+    take?: number;
+    miss?: number;
+};
+
 export type Medication = {
     id: number;
     name: string;
@@ -31,6 +37,15 @@ export type Medication = {
     startDate: string;
     createdAt: string;
     note?: string;
+    lastDayAction?: LastDayAction;
+};
+
+export type MedicationSummary = {
+    id: number;
+    name: string;
+    dosageRemaining: number;
+    refillDate: string;
+    diffDays: number;
 };
 
 export type MedicationInput = Omit<Medication, 'id' | 'createdAt' | 'refillDate'>;

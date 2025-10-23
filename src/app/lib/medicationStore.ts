@@ -1,5 +1,5 @@
-import { MedicationInput, Medication } from "@/app/types";
-import { calculateRefillDate } from "@/app/utils";
+import { MedicationInput, Medication, RefillStatus } from "@/app/types";
+import { calculateRefillDate, getRefillStatus } from "@/app/utils";
 import { DEFAULT_EXPIRING_DAYS } from "@/app/const";
 
 class MedicationStore {
@@ -54,17 +54,11 @@ class MedicationStore {
     }
 
     getExpiringSoon(days: number = DEFAULT_EXPIRING_DAYS): Medication[] {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const futureDate = new Date(today);
-        futureDate.setDate(futureDate.getDate() + days);
-
         return this.medications
             .filter(med => {
                 const refillDate = new Date(med.refillDate);
-                refillDate.setHours(0, 0, 0, 0);
-                return refillDate >= today && refillDate <= futureDate && med.dosageRemaining > 0;
+                const status = getRefillStatus(refillDate, med.dosageRemaining);
+                return status === RefillStatus.ENDING_SOON;
             })
             .sort((a, b) => {
                 return new Date(a.refillDate).getTime() - new Date(b.refillDate).getTime();
@@ -74,7 +68,9 @@ class MedicationStore {
     getExpired(): Medication[] {
         return this.medications
             .filter(med => {
-                return med.dosageRemaining <= 0;
+                const refillDate = new Date(med.refillDate);
+                const status = getRefillStatus(refillDate, med.dosageRemaining);
+                return status === RefillStatus.EXPIRED;
             })
             .sort((a, b) => {
                 return new Date(a.refillDate).getTime() - new Date(b.refillDate).getTime();

@@ -1,4 +1,6 @@
 import { medicationStore } from '@/app/lib/medicationStore';
+import { MedicationSummary } from '@/app/types';
+import { getDaysAgo } from '@/app/utils';
 import { NextResponse } from 'next/server';
 
 // GET expired medications (dosageRemaining <= 0)
@@ -6,18 +8,17 @@ export async function GET() {
   try {
     const expired = medicationStore.getExpired();
     
-    if (expired.length === 0) {
-      return NextResponse.json(
-        { medications: [], count: 0, message: 'No expired medications' },
-        { status: 200 }
-      );
-    }
-    
-    return NextResponse.json({
-      medications: expired,
-      count: expired.length,
-      message: `${expired.length} medication${expired.length !== 1 ? 's have' : ' has'} expired`
+    const medicationsSummaries: MedicationSummary[] = expired.map(med => {
+      return {
+        id: med.id,
+        name: med.name,
+        dosageRemaining: med.dosageRemaining,
+        refillDate: med.refillDate,
+        diffDays: getDaysAgo(med.refillDate),
+      }
     });
+    
+    return NextResponse.json(medicationsSummaries);
     
   } catch (error) {
     return NextResponse.json(

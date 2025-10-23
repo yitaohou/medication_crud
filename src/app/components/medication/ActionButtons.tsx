@@ -76,7 +76,7 @@ export default function ActionButtons({
 
     // We assume that the user cannot take more medication than they suppose to
     // e.g. they cant take 2 dosage if they are only allowed to take 1 dosage per day
-    const maxAllowance = calculateMaxAllowance(medication.startDate, medication.frequency.per, medication.frequency.times) + medication.frequency.times / medication.frequency.per;
+    const maxAllowance = calculateMaxAllowance(medication.startDate, medication.frequency.per, medication.frequency.times, true);
     const currentAllowance = medication.dosageTotal - medication.dosageRemaining + medication.dosageMissed;
 
     const noDosageRemaining = medication.dosageRemaining < 1;

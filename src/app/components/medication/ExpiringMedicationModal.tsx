@@ -1,51 +1,32 @@
 'use client';
 
 import Modal from '@/app/components/ui/Modal';
-import { DEFAULT_EXPIRING_DAYS, MILLISECONDS_PER_DAY } from '@/app/const';
-import { Medication } from '@/app/types';
-
-type MedicationWithDays = Medication & {
-    daysRemaining: number;
-};
+import { DEFAULT_EXPIRING_DAYS } from '@/app/const';
+import { MedicationSummary } from '@/app/types';
 
 type ExpiringMedicationsModalProps = {
     isOpen: boolean;
     onClose: () => void;
-    medications: MedicationWithDays[];
+    medicationSummaries: MedicationSummary[];
 };
 
 export default function ExpiringMedicationsModal({ 
     isOpen, 
     onClose, 
-    medications 
+    medicationSummaries 
 }: ExpiringMedicationsModalProps) {
-    
-    const getDaysUntil = (refillDate: string): number => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        
-        const expiry = new Date(refillDate);
-        expiry.setHours(0, 0, 0, 0);
-        
-        const diffTime = expiry.getTime() - today.getTime();
-        const diffDays = Math.ceil(diffTime / MILLISECONDS_PER_DAY);
-        
-        return diffDays;
-    };
-
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Medications Expiring Soon">
             <div className="space-y-3">
-                {medications.length === 0 ? (
+                {medicationSummaries.length === 0 ? (
                     <p className="text-sm text-gray-500 italic">No medications expiring soon</p>
                 ) : (
                     <>
                         <p className="text-sm text-gray-600 mb-4">
-                            {medications.length} medication{medications.length !== 1 ? 's are' : ' is'} expiring within {DEFAULT_EXPIRING_DAYS} days
+                            {medicationSummaries.length} medication{medicationSummaries.length !== 1 ? 's are' : ' is'} expiring within {DEFAULT_EXPIRING_DAYS} days
                         </p>
                         <div className="space-y-2">
-                            {medications.map((med) => {
-                                const daysUntil = getDaysUntil(med.refillDate);
+                            {medicationSummaries.map((med) => {
                                 return (
                                     <div 
                                         key={med.id} 
@@ -59,7 +40,7 @@ export default function ExpiringMedicationsModal({
                                         </div>
                                         <div className="text-right">
                                             <p className="text-sm font-medium text-yellow-700">
-                                                {daysUntil === 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : `In ${daysUntil} days`}
+                                                {med.diffDays === 0 ? 'Today' : med.diffDays === 1 ? 'Tomorrow' : `In ${med.diffDays} days`}
                                             </p>
                                             <p className="text-xs text-gray-500">
                                                 {new Date(med.refillDate).toLocaleDateString('en-US')}

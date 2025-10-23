@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { calculateDosageRemaining, calculateMaxAllowance, calculateRefillDate } from '@/app/utils';
+import { calculateDosageRemaining, calculateMaxAllowance, calculateRefillDate, getTodayDateString } from '@/app/utils';
 import { Medication, MedicationInput } from '@/app/types';
 import Modal from '@/app/components/ui/Modal';
 import Autocomplete from '@/app/components/ui/Autocomplete';
@@ -41,13 +41,10 @@ const getInitialFormData = (mode: ModalMode, medication?: Medication) => {
 };
 
 export default function MedicationModal({ mode, isOpen, onClose, medication }: MedicationModalProps) {
-    console.log("medication", medication);
     const router = useRouter();
 
     const [formData, setFormData] = useState(() => getInitialFormData(mode, medication));
     const [isLoading, setIsLoading] = useState(false);
-
-    console.log("formData", formData);
 
     useEffect(() => {
         if (isOpen) {
@@ -68,6 +65,16 @@ export default function MedicationModal({ mode, isOpen, onClose, medication }: M
         return calculateMaxAllowance(formData.startDate, formData.frequencyPer, formData.frequencyTimes);
     }, [formData.startDate, formData.frequencyPer, formData.frequencyTimes]);
 
+    const todayMissed = useMemo(() => {
+        const today = getTodayDateString();
+        if (medication?.lastDayAction && medication.lastDayAction.date === today) {
+            return medication.lastDayAction.miss || 0;
+        }
+        return 0;
+    }, [medication]);
+
+    const minMissedDosage = todayMissed;
+    const maxMissedDosage = maxAllowance + todayMissed;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -85,7 +92,7 @@ export default function MedicationModal({ mode, isOpen, onClose, medication }: M
             const body: MedicationInput = {
                 name: formData.name,
                 dosageTotal: formData.dosageTotal,
-                dosageRemaining: calculateDosageRemaining(formData.startDate, formData.frequencyPer, formData.frequencyTimes, formData.dosageTotal, dosageMissed),
+                dosageRemaining: calculateDosageRemaining(formData.startDate, formData.frequencyPer, formData.frequencyTimes, formData.dosageTotal, dosageMissed, medication?.lastDayAction),
                 dosageMissed: dosageMissed,
                 frequency: {
                     times: formData.frequencyTimes,
@@ -193,10 +200,15 @@ export default function MedicationModal({ mode, isOpen, onClose, medication }: M
                         <input
                             type="number"
                             required
-                            min="0"
-                            max={Math.min(formData.dosageTotal, maxAllowance)}
+                            min={minMissedDosage}
+                            max={maxMissedDosage}
                             value={formData.dosageMissed}
-                            onChange={(e) => setFormData({ ...formData, dosageMissed: parseInt(e.target.value) || 0 })}
+                            onChange={(e) => {
+                                const value = parseInt(e.target.value) || 0;
+                                if (value >= minMissedDosage && value <= maxMissedDosage) {
+                                    setFormData({ ...formData, dosageMissed: value });
+                                }
+                            }}
                             className="modal-input"
                             placeholder="e.g., 5"
                         />
@@ -206,7 +218,7 @@ export default function MedicationModal({ mode, isOpen, onClose, medication }: M
                 <div>
                     <label className="modal-field">
                         Dosage Remaining:&nbsp;
-                        <span>{calculateDosageRemaining(formData.startDate, formData.frequencyPer, formData.frequencyTimes, formData.dosageTotal, formData.dosageMissed)}</span>
+                        <span>{calculateDosageRemaining(formData.startDate, formData.frequencyPer, formData.frequencyTimes, formData.dosageTotal, formData.dosageMissed, medication?.lastDayAction)}</span>
                     </label>
                 </div>
 

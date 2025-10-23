@@ -1,36 +1,25 @@
 import { medicationStore } from '@/app/lib/medicationStore';
+import { MedicationSummary } from '@/app/types';
+import { getDaysUntil } from '@/app/utils';
 import { NextResponse } from 'next/server';
-import { calculateRemainingDays } from '@/app/utils';
 
 // GET medications expiring within 7 days
 export async function GET() {
   try {
-    const expiringSoon = medicationStore.getExpiringSoon(7);
-    
-    if (expiringSoon.length === 0) {
-      return NextResponse.json(
-        { medications: [], count: 0, message: 'No medications expiring soon' },
-        { status: 200 }
-      );
-    }
-    
-    const medicationsWithDays = expiringSoon.map(med => {
-      const daysRemaining = Math.floor(
-        calculateRemainingDays(med.dosageRemaining, med.frequency)
-      );
-      
+    const expiringSoon = medicationStore.getExpiringSoon();
+
+    const medicationsSummaries: MedicationSummary[] = expiringSoon.map(med => {
       return {
-        ...med,
-        daysRemaining,
-      };
+        id: med.id,
+        name: med.name,
+        dosageRemaining: med.dosageRemaining,
+        refillDate: med.refillDate,
+        diffDays: getDaysUntil(med.refillDate),
+      }
     });
-    
-    return NextResponse.json({
-      medications: medicationsWithDays,
-      count: medicationsWithDays.length,
-      message: `${medicationsWithDays.length} medication${medicationsWithDays.length !== 1 ? 's' : ''} expiring soon`
-    });
-    
+
+    return NextResponse.json(medicationsSummaries);
+
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to get expiring medications' },

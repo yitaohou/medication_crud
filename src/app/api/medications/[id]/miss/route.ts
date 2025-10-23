@@ -1,4 +1,5 @@
 import { medicationStore } from '@/app/lib/medicationStore';
+import { calculateMaxAllowance, getTodayDateString } from '@/app/utils';
 import { NextRequest, NextResponse } from 'next/server';
 
 // POST miss medication (increase dosageMissed by 1)
@@ -26,8 +27,49 @@ export async function POST(
             );
         }
 
+        if (medication.dosageRemaining < 1) {
+            return NextResponse.json(
+                { error: 'No dosage remaining to miss' },
+                { status: 400 }
+            );
+        }
+
+        const maxAllowanceIncludingToday = calculateMaxAllowance(
+            medication.startDate,
+            medication.frequency.per,
+            medication.frequency.times,
+            true
+        );
+
+        const maxAllowanceUpToYesterday = calculateMaxAllowance(
+            medication.startDate,
+            medication.frequency.per,
+            medication.frequency.times,
+            false
+        );
+
+        const todayMaxAllowance = maxAllowanceIncludingToday - maxAllowanceUpToYesterday;
+
+        const today = getTodayDateString();
+        const currentAction = medication.lastDayAction;
+        const currentTodayTotal = currentAction?.date === today
+            ? (currentAction.take || 0) + (currentAction.miss || 0)
+            : 0;
+
+        if (currentTodayTotal >= todayMaxAllowance) {
+            return NextResponse.json(
+                { error: `Cannot miss more doses today. Maximum ${todayMaxAllowance} dose(s) allowed based on your schedule` },
+                { status: 400 }
+            );
+        }
+
+        const newLastDayAction = currentAction?.date === today
+            ? { ...currentAction, miss: (currentAction.miss || 0) + 1 }
+            : { date: today, miss: 1 };
+
         const updatedMedication = medicationStore.update(id, {
-            dosageMissed: medication.dosageMissed + 1
+            dosageMissed: medication.dosageMissed + 1,
+            lastDayAction: newLastDayAction
         });
 
         return NextResponse.json({
