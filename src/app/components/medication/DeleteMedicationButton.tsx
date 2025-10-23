@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { medicationEvents } from '@/app/lib/medicationEvents';
 
 type DeleteMedicationButtonProps = {
   medicationId: number;
@@ -33,6 +34,8 @@ export default function DeleteMedicationButton({ medicationId, medicationName }:
 
       router.refresh();
 
+      medicationEvents.emit();
+
       alert(`${medicationName} deleted successfully!`);
     } catch (error) {
       console.error('Error deleting medication:', error);
@@ -45,7 +48,7 @@ export default function DeleteMedicationButton({ medicationId, medicationName }:
   return (
     <button
       onClick={handleDelete}
-      className="btn bg-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+      className="btn bg-red-500 hover:bg-red-600"
       disabled={isLoading}
       title={isLoading ? 'Loading...' : 'Delete Medication'}
     >

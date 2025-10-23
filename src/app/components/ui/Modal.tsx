@@ -27,8 +27,10 @@ export default function Modal({
                 className={`bg-white rounded-lg p-6 w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto`}
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold text-gray-800">
+                <div className="flex justify-between items-center mb-4 gap-3">
+                    <h2 className="text-2xl font-bold text-gray-800 truncate"
+                        title={title}
+                    >
                         {title}
                     </h2>
                     <button

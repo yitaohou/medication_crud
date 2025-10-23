@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import MedicationModal from './MedicationModal';
-import { Medication } from '../../types';
+import MedicationModal from '@/app/components/medication/MedicationModal';
+import { ModalMode, Medication } from '@/app/types';
 
 type EditMedicationButtonProps = {
   medication: Medication;
@@ -21,7 +21,7 @@ export default function EditMedicationButton({ medication }: EditMedicationButto
       </button>
 
       <MedicationModal
-        mode="edit"
+        mode={ModalMode.EDIT}
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         medication={medication}

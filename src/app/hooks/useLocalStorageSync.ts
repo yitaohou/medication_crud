@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Medication } from '../types';
+import { Medication } from '@/app/types';
 
 const STORAGE_KEY = 'medication_crud_backup';
 

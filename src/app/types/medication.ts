@@ -3,6 +3,22 @@ export type Frequency = {
     per: number; // per day
 }
 
+export enum RefillStatus {
+    EXPIRED = 'expired',
+    ENDING_SOON = 'ending-soon',
+    NORMAL = 'normal'
+}
+
+export enum ActionType {
+    TAKE = 'take',
+    MISS = 'miss'
+}
+
+export enum ModalMode {
+    ADD = 'add',
+    EDIT = 'edit'
+}
+
 export type Medication = {
     id: number;
     name: string;

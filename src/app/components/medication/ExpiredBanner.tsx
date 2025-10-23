@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import ExpiredMedicationsModal from './ExpiredMedicationsModal';
-import { Medication } from '../../types';
+import ExpiredMedicationsModal from '@/app/components/medication/ExpiredMedicationsModal';
+import { Medication } from '@/app/types';
+import { medicationEvents } from '@/app/lib/medicationEvents';
 
 export default function ExpiredBanner() {
     const [data, setData] = useState<{ medications: Medication[], count: number, message: string } | null>(null);
@@ -19,6 +20,14 @@ export default function ExpiredBanner() {
             }
         }
         fetchExpired();
+
+        const unsubscribe = medicationEvents.subscribe(() => {
+            fetchExpired();
+        });
+
+        return () => {
+            unsubscribe();
+        };
     }, []);
 
     if (!data || data.count === 0) {
@@ -33,9 +42,9 @@ export default function ExpiredBanner() {
                         <strong className="text-red-800">🚨 Alert:</strong>
                         <span className="ml-2 text-red-700">{data.message}</span>
                     </div>
-                    <button 
+                    <button
                         onClick={() => setIsModalOpen(true)}
-                        className="text-xs text-red-800 hover:text-red-900 underline font-medium"
+                        className="text-button text-red-800 hover:text-red-900"
                     >
                         View All
                     </button>

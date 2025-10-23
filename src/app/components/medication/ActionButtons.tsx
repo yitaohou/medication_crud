@@ -1,9 +1,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Medication } from "../../types";
-import { calculateMaxAllowance } from '../../utils';
+import { ActionType, Medication } from "@/app/types";
+import { calculateMaxAllowance } from '@/app/utils';
 import { useState } from 'react';
+import { medicationEvents } from '@/app/lib/medicationEvents';
 
 type ActionButtonsProps = {
     medication: Medication;
@@ -32,9 +33,13 @@ export default function ActionButtons({
             console.log('Missed:', result);
 
             router.refresh();
+
+            medicationEvents.emit();
         } catch (error) {
             console.error('Error marking medication as missed:', error);
             alert(`Failed to mark ${medication.name} as missed`);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -59,6 +64,8 @@ export default function ActionButtons({
             console.log('Taken:', result);
 
             router.refresh();
+
+            medicationEvents.emit();
         } catch (error) {
             console.error('Error taking medication:', error);
             alert(`Failed to take ${medication.name}`);
@@ -76,11 +83,11 @@ export default function ActionButtons({
     const exceededAllowance = currentAllowance >= maxAllowance;
     const isDisabled = isLoading || noDosageRemaining || exceededAllowance;
 
-    const getButtonTitle = (actionType: 'take' | 'miss'): string => {
+    const getButtonTitle = (actionType: ActionType): string => {
         if (noDosageRemaining) return 'No dosage remaining';
         if (exceededAllowance) return 'Exceeded maximum allowance';
         if (isLoading) return 'Loading...';
-        return actionType === 'take' ? 'Mark as taken' : 'Mark as missed';
+        return actionType === ActionType.TAKE ? 'Mark as taken' : 'Mark as missed';
     };
 
     return (
@@ -88,16 +95,16 @@ export default function ActionButtons({
             <button
                 onClick={handleTake}
                 disabled={isDisabled}
-                className="btn bg-green-500 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                title={getButtonTitle('take')}
+                className="btn bg-green-500 hover:bg-green-600"
+                title={getButtonTitle(ActionType.TAKE)}
             >
                 ✓ Take
             </button>
             <button
                 onClick={handleMiss}
                 disabled={isDisabled}
-                className="btn bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                title={getButtonTitle('miss')}
+                className="btn bg-orange-500 hover:bg-orange-600"
+                title={getButtonTitle(ActionType.MISS)}
             >
                 ✗ Miss
             </button>

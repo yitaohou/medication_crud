@@ -1,8 +1,7 @@
-// src/app/lib/pdfExport.ts
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { Medication } from '../types';
-import { formatMedicationsForExport } from '../utils';
+import { Medication } from '@/app/types';
+import { formatMedicationsForExport } from '@/app/utils';
 
 export function exportRefillScheduleToPDF(medications: Medication[]) {
     const doc = new jsPDF();
@@ -16,7 +15,7 @@ export function exportRefillScheduleToPDF(medications: Medication[]) {
     const tableData = formatMedicationsForExport(medications);
     
     autoTable(doc, {
-        head: [['Medication', 'Dosage', 'Frequency', 'Refill Date', 'Time Until', 'Status']],
+        head: [['Medication', 'Remaining Dosage', 'Frequency', 'Refill Date', 'Time Until', 'Status']],
         body: tableData,
         startY: 35,
         theme: 'grid',

@@ -1,7 +1,7 @@
 'use client';
 
-import { useLocalStorageSync } from '../hooks/useLocalStorageSync';
-import { Medication } from '../types';
+import { useLocalStorageSync } from '@/app/hooks/useLocalStorageSync';
+import { Medication } from '@/app/types';
 
 type LocalStorageSyncProps = {
     medications: Medication[];

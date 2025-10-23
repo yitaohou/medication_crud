@@ -1,8 +1,9 @@
 // src/app/components/medication/ExpiredMedicationsModal.tsx
 'use client';
 
-import Modal from '../ui/Modal';
-import { Medication } from '../../types';
+import Modal from '@/app/components/ui/Modal';
+import { MILLISECONDS_PER_DAY } from '@/app/const';
+import { Medication } from '@/app/types';
 
 type ExpiredMedicationsModalProps = {
     isOpen: boolean;
@@ -24,7 +25,7 @@ export default function ExpiredMedicationsModal({
         expiry.setHours(0, 0, 0, 0);
         
         const diffTime = today.getTime() - expiry.getTime();
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const diffDays = Math.floor(diffTime / MILLISECONDS_PER_DAY);
         
         return diffDays;
     };
@@ -45,7 +46,7 @@ export default function ExpiredMedicationsModal({
                                 return (
                                     <div 
                                         key={med.id} 
-                                        className="flex justify-between items-center p-3 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+                                        className="modal-warning-cell bg-red-50  border-red-200  hover:bg-red-100"
                                     >
                                         <div className="flex-1">
                                             <p className="font-semibold text-gray-800">{med.name}</p>

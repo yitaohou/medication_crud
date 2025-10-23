@@ -1,7 +1,8 @@
 'use client';
 
-import Modal from '../ui/Modal';
-import { Medication } from '../../types';
+import Modal from '@/app/components/ui/Modal';
+import { DEFAULT_EXPIRING_DAYS, MILLISECONDS_PER_DAY } from '@/app/const';
+import { Medication } from '@/app/types';
 
 type MedicationWithDays = Medication & {
     daysRemaining: number;
@@ -27,7 +28,7 @@ export default function ExpiringMedicationsModal({
         expiry.setHours(0, 0, 0, 0);
         
         const diffTime = expiry.getTime() - today.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffDays = Math.ceil(diffTime / MILLISECONDS_PER_DAY);
         
         return diffDays;
     };
@@ -40,7 +41,7 @@ export default function ExpiringMedicationsModal({
                 ) : (
                     <>
                         <p className="text-sm text-gray-600 mb-4">
-                            {medications.length} medication{medications.length !== 1 ? 's are' : ' is'} expiring within 7 days
+                            {medications.length} medication{medications.length !== 1 ? 's are' : ' is'} expiring within {DEFAULT_EXPIRING_DAYS} days
                         </p>
                         <div className="space-y-2">
                             {medications.map((med) => {
@@ -48,7 +49,7 @@ export default function ExpiringMedicationsModal({
                                 return (
                                     <div 
                                         key={med.id} 
-                                        className="flex justify-between items-center p-3 bg-yellow-50 border border-yellow-200 rounded-lg hover:bg-yellow-100 transition-colors"
+                                        className="modal-warning-cell bg-yellow-50 border-yellow-200 hover:bg-yellow-100"
                                     >
                                         <div className="flex-1">
                                             <p className="font-semibold text-gray-800">{med.name}</p>

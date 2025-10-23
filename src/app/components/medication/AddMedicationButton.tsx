@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import MedicationModal from './MedicationModal';
+import MedicationModal from '@/app/components/medication/MedicationModal';
+import { ModalMode } from '@/app/types';
 
 export default function AddMedicationButton() {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,13 +11,13 @@ export default function AddMedicationButton() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="btn bg-green-500 hover:bg-green-600"
+        className="btn btn-lg bg-green-500 hover:bg-green-600"
       >
         + Add Medication
       </button>
 
       <MedicationModal
-        mode="add"
+        mode={ModalMode.ADD}
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
       />

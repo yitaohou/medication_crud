@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Medication } from '../../types';
-import ExpiringMedicationsModal from './ExpiringMedicationModal';
+import { Medication } from '@/app/types';
+import ExpiringMedicationsModal from '@/app/components/medication/ExpiringMedicationModal';
+import { medicationEvents } from '@/app/lib/medicationEvents';
 
 type MedicationWithDays = Medication & {
-    daysRemaining: number;
+    daysRemaining: number;  
 };
 
 export default function ExpiringBanner() {
@@ -23,6 +24,14 @@ export default function ExpiringBanner() {
             }
         }
         fetchExpiring();
+
+        const unsubscribe = medicationEvents.subscribe(() => {
+            fetchExpiring();
+        });
+
+        return () => {
+            unsubscribe();
+        };
     }, []);
 
     if (!data || data.count === 0) {
@@ -40,7 +49,7 @@ export default function ExpiringBanner() {
                     {data.count > 0 && (
                         <button 
                             onClick={() => setIsModalOpen(true)}
-                            className="text-xs text-yellow-800 hover:text-yellow-900 underline font-medium"
+                            className="text-button text-yellow-800 hover:text-yellow-900"
                         >
                             View All
                         </button>

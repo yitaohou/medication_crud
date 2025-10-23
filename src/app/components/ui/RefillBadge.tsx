@@ -1,5 +1,4 @@
-import { Frequency } from "../../types";
-import { getRefillStatus } from "../../utils";
+import { getRefillStatus } from "@/app/utils";
 
 type RefillBadgeProps = { 
     refillDate: Date;

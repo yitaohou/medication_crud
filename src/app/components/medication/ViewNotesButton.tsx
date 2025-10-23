@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import NotesModal from './NotesModals';
+import NotesModal from '@/app/components/medication/NotesModals';
 
 type ViewNotesButtonProps = {
     note: string;
@@ -12,18 +12,13 @@ type ViewNotesButtonProps = {
 export default function ViewNotesButton({ note, name, dnc }: ViewNotesButtonProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Don't show button if no notes
-    if (!note) {
-        return null;
-    }
-
     return (
         <>
             <button
                 onClick={() => setIsModalOpen(true)}
-                className="text-xs text-blue-600 hover:text-blue-800 underline"
+                className="text-button text-blue-600 hover:text-blue-800"
             >
-                view notes
+                view details
             </button>
             <NotesModal
                 isOpen={isModalOpen}

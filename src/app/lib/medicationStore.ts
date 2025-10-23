@@ -1,5 +1,6 @@
-import { MedicationInput, Medication } from "../types";
-import { calculateRefillDate } from "../utils";
+import { MedicationInput, Medication } from "@/app/types";
+import { calculateRefillDate } from "@/app/utils";
+import { DEFAULT_EXPIRING_DAYS } from "@/app/const";
 
 class MedicationStore {
     private medications: Medication[] = [];
@@ -52,7 +53,7 @@ class MedicationStore {
         return true;
     }
 
-    getExpiringSoon(days: number = 7): Medication[] {
+    getExpiringSoon(days: number = DEFAULT_EXPIRING_DAYS): Medication[] {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 

@@ -1,16 +1,17 @@
-import LocalStorageSync from "./components/LocalStorageSync";
-import ActionButtons from "./components/medication/ActionButtons";
-import AddMedicationButton from "./components/medication/AddMedicationButton";
-import DeleteMedicationButton from "./components/medication/DeleteMedicationButton";
-import EditMedicationButton from "./components/medication/EditMedicationButton";
-import ExpiredBanner from "./components/medication/ExpiredBanner";
-import ExpiringBanner from "./components/medication/ExpiringBanner";
-import ExportButton from "./components/medication/ExportButton";
-import ViewNotesButton from "./components/medication/ViewNotesButton";
-import ProgressBar from "./components/ui/ProgressBar";
-import RefillBadge from "./components/ui/RefillBadge";
-import { Medication } from "./types";
-import { formatDate, formatFrequency } from "./utils";
+import LocalStorageSync from "@/app/components/LocalStorageSync";
+import ActionButtons from "@/app/components/medication/ActionButtons";
+import AddMedicationButton from "@/app/components/medication/AddMedicationButton";
+import DeleteMedicationButton from "@/app/components/medication/DeleteMedicationButton";
+import EditMedicationButton from "@/app/components/medication/EditMedicationButton";
+import ExpiredBanner from "@/app/components/medication/ExpiredBanner";
+import ExpiringBanner from "@/app/components/medication/ExpiringBanner";
+import ExportButton from "@/app/components/medication/ExportButton";
+import ViewNotesButton from "@/app/components/medication/ViewNotesButton";
+import ProgressBar from "@/app/components/ui/ProgressBar";
+import RefillBadge from "@/app/components/ui/RefillBadge";
+import { Medication } from "@/app/types";
+import { formatDate, formatFrequency } from "@/app/utils";
+import ResetButton from "@/app/components/medication/ResetButton";
 
 async function getMedications(): Promise<Medication[]> {
   const res = await fetch('http://localhost:3000/api/medications', {
@@ -26,16 +27,18 @@ async function getMedications(): Promise<Medication[]> {
 
 export default async function Home() {
   const medications = await getMedications();
-  console.log('Editing medication:', medications);
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
       <LocalStorageSync medications={medications} />
-      
+
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Medications</h1>
-        <ExportButton medications={medications} />
-        <AddMedicationButton />
+        <div className="flex gap-2">
+          <ExportButton medications={medications} />
+          <ResetButton />
+          <AddMedicationButton />
+        </div>
       </div>
 
       <ExpiredBanner />
@@ -62,11 +65,11 @@ export default async function Home() {
                 const dosageTaken = med.dosageTotal - med.dosageRemaining;
                 const totalActions = dosageTaken + med.dosageMissed;
                 return (
-                  <tr key={med.id} className="table-row">
+                  <tr key={`medication-list-item-${med.id}`} className="table-row">
                     <td className="table-cell">{med.id}</td>
                     <td className="table-cell">
-                      <div className="flex gap-2 flex-col">
-                        <div className="font-semibold">{med.name}</div>
+                      <div className="flex gap-2 flex-col max-w-[200px]">
+                        <div className="font-semibold truncate">{med.name}</div>
                         <div>
                           <ViewNotesButton name={med.name} note={med.note || ''} dnc={med.dnc} />
                         </div>

@@ -1,9 +1,8 @@
-// src/app/lib/csvExport.ts
-import { Medication } from '../types';
-import { formatMedicationsForExport } from '../utils';
+import { Medication } from '@/app/types';
+import { formatMedicationsForExport } from '@/app/utils';
 
 export function exportRefillScheduleToCSV(medications: Medication[]) {
-    const headers = ['Medication', 'Dosage Remaining', 'Dosage Total', 'Frequency', 'Start Date', 'Refill Date', 'Days Until Refill', 'Missed Doses', 'Notes'];
+    const headers = ['Medication', 'Remaining Dosage', 'Frequency', 'Refill Date', 'Time Until', 'Status'];
     
     const rows = formatMedicationsForExport(medications);
     

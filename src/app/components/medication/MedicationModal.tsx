@@ -1,25 +1,25 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { calculateDosageRemaining, calculateMaxAllowance, calculateRefillDate } from '../../utils';
-import { Medication, MedicationInput } from '../../types';
-import Modal from '../ui/Modal';
-import Autocomplete from '../ui/Autocomplete';
+import { calculateDosageRemaining, calculateMaxAllowance, calculateRefillDate } from '@/app/utils';
+import { Medication, MedicationInput } from '@/app/types';
+import Modal from '@/app/components/ui/Modal';
+import Autocomplete from '@/app/components/ui/Autocomplete';
 import { searchDrugs } from '@/app/lib/drugApi';
+import { ModalMode } from '@/app/types';
+import { medicationEvents } from '@/app/lib/medicationEvents';
+import { AUTOCOMPLETE_DEBOUNCE_MS, MAX_DOSAGE_TOTAL, MAX_FREQUENCY_PER, MAX_FREQUENCY_TIMES, MAX_MEDICATION_NAME_LENGTH, MAX_NOTE_LENGTH } from '@/app/const';
 
 type MedicationModalProps = {
-    mode: 'add' | 'edit';
+    mode: ModalMode;
     isOpen: boolean;
     onClose: () => void;
     medication?: Medication;
 };
 
-export default function MedicationModal({ mode, isOpen, onClose, medication }: MedicationModalProps) {
-
-    const router = useRouter();
-
-    const initialFormData = mode === 'edit' && medication ? {
+const getInitialFormData = (mode: ModalMode, medication?: Medication) => {
+    return mode === ModalMode.EDIT && medication ? {
         name: medication.name,
         dosageTotal: medication.dosageTotal,
         dosageRemaining: medication.dosageRemaining,
@@ -38,9 +38,22 @@ export default function MedicationModal({ mode, isOpen, onClose, medication }: M
         frequencyPer: 1,
         startDate: new Date().toISOString().split('T')[0],
     };
+};
 
-    const [formData, setFormData] = useState(initialFormData);
+export default function MedicationModal({ mode, isOpen, onClose, medication }: MedicationModalProps) {
+    console.log("medication", medication);
+    const router = useRouter();
+
+    const [formData, setFormData] = useState(() => getInitialFormData(mode, medication));
     const [isLoading, setIsLoading] = useState(false);
+
+    console.log("formData", formData);
+
+    useEffect(() => {
+        if (isOpen) {
+            setFormData(getInitialFormData(mode, medication));
+        }
+    }, [isOpen, mode, medication]);
 
     const showMissedField = useMemo(() => {
         const [year, month, day] = formData.startDate.split('-').map(Number);
@@ -61,11 +74,11 @@ export default function MedicationModal({ mode, isOpen, onClose, medication }: M
 
         try {
             setIsLoading(true);
-            const url = mode === 'add'
+            const url = mode === ModalMode.ADD
                 ? '/api/medications'
                 : `/api/medications/${medication?.id}`;
 
-            const method = mode === 'add' ? 'POST' : 'PUT';
+            const method = mode === ModalMode.ADD ? 'POST' : 'PUT';
 
             const dosageMissed = Math.min(formData.dosageMissed, maxAllowance);
 
@@ -102,16 +115,18 @@ export default function MedicationModal({ mode, isOpen, onClose, medication }: M
             }
 
             const result = await response.json();
-            console.log(`${mode === 'add' ? 'Added' : 'Updated'}:`, result);
+            console.log(`${mode === ModalMode.ADD ? 'Added' : 'Updated'}:`, result);
 
             onClose();
 
             router.refresh();
 
-            alert(`Medication ${mode === 'add' ? 'added' : 'updated'} successfully!`);
+            medicationEvents.emit();
+
+            alert(`Medication ${mode === ModalMode.ADD ? 'added' : 'updated'} successfully!`);
         } catch (error) {
-            console.error(`Error ${mode}ing medication:`, error);
-            alert(`Failed to ${mode} medication`);
+            console.error(`Error ${mode === ModalMode.ADD ? 'adding' : 'updating'} medication:`, error);
+            alert(`Failed to ${mode === ModalMode.ADD ? 'add' : 'update'} medication`);
         } finally {
             setIsLoading(false)
         }
@@ -123,7 +138,7 @@ export default function MedicationModal({ mode, isOpen, onClose, medication }: M
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title={`${mode === 'add' ? 'Add' : 'Edit'} Medication`}
+            title={`${mode === ModalMode.ADD ? 'Add' : 'Edit'} Medication`}
         >
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -132,8 +147,11 @@ export default function MedicationModal({ mode, isOpen, onClose, medication }: M
                     </label>
                     <Autocomplete
                         value={formData.name}
-                        onChange={(value, dnc) => setFormData({ ...formData, name: value, dnc: dnc })}
-                        onSearch={async (query) => {
+                        onChange={(value, dnc) => {
+                            if (value.length <= MAX_MEDICATION_NAME_LENGTH) {
+                                setFormData({ ...formData, name: value, dnc: dnc });
+                            }
+                        }} onSearch={async (query) => {
                             const results = await searchDrugs(query);
                             return results.map(drug => ({
                                 label: drug.brand_name,
@@ -144,8 +162,11 @@ export default function MedicationModal({ mode, isOpen, onClose, medication }: M
                         placeholder="e.g., Aspirin, Tylenol, Advil"
                         required
                         className="modal-input"
-                        debounceMs={300}
+                        debounceMs={AUTOCOMPLETE_DEBOUNCE_MS}
                     />
+                    {formData.name.length >= MAX_MEDICATION_NAME_LENGTH && (
+                        <p className="text-xs text-red-600 mt-1">Maximum character limit reached</p>
+                    )}
                 </div>
 
                 <div>
@@ -156,6 +177,7 @@ export default function MedicationModal({ mode, isOpen, onClose, medication }: M
                         type="number"
                         required
                         min="0"
+                        max={MAX_DOSAGE_TOTAL}
                         value={formData.dosageTotal}
                         onChange={(e) => setFormData({ ...formData, dosageTotal: parseInt(e.target.value) || 0 })}
                         className="modal-input"
@@ -217,6 +239,7 @@ export default function MedicationModal({ mode, isOpen, onClose, medication }: M
                             type="number"
                             required
                             min="1"
+                            max={MAX_FREQUENCY_TIMES}
                             value={formData.frequencyTimes}
                             onChange={(e) => setFormData({ ...formData, frequencyTimes: parseInt(e.target.value) })}
                             className="modal-input"
@@ -231,6 +254,7 @@ export default function MedicationModal({ mode, isOpen, onClose, medication }: M
                             type="number"
                             required
                             min="1"
+                            max={MAX_FREQUENCY_PER}
                             value={formData.frequencyPer}
                             onChange={(e) => setFormData({ ...formData, frequencyPer: parseInt(e.target.value) })}
                             className="modal-input"
@@ -244,21 +268,28 @@ export default function MedicationModal({ mode, isOpen, onClose, medication }: M
 
                 <div>
                     <label className="modal-field">
-                        Dosage Per Take (Optional)
+                        Note (Optional)
                     </label>
                     <textarea
                         value={formData.note}
-                        onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                        onChange={(e) => {
+                            if (e.target.value.length <= MAX_NOTE_LENGTH) {
+                                setFormData({ ...formData, note: e.target.value });
+                            }
+                        }}
                         className="modal-input resize-y min-h-[80px]"
                         placeholder="e.g., two tablets per take, avoid alcohol"
                         rows={3}
                     />
+                    {formData.note && formData.note.length >= MAX_NOTE_LENGTH && (
+                        <p className="text-xs text-red-600 mt-1">Maximum character limit reached</p>
+                    )}
                 </div>
 
                 <div className="flex gap-3 pt-4">
                     <button
                         type="submit"
-                        className="flex-1 btn bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        className="flex-1 btn bg-blue-500 hover:bg-blue-600"
                         disabled={isLoading}
                         title={isLoading ? 'Loading...' : mode === 'add' ? 'Add Medication' : 'Update Medication'}
                     >
@@ -267,7 +298,7 @@ export default function MedicationModal({ mode, isOpen, onClose, medication }: M
                     <button
                         type="button"
                         onClick={onClose}
-                        className="flex-1 btn bg-gray-300 hover:bg-gray-400 text-gray-700"
+                        className="flex-1 btn bg-gray-300"
                     >
                         Cancel
                     </button>

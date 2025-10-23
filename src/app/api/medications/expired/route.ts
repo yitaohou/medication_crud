@@ -1,4 +1,3 @@
-// /Users/yitaohou/medication_crud/src/app/api/medications/expired/route.ts
 import { medicationStore } from '@/app/lib/medicationStore';
 import { NextResponse } from 'next/server';
 

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Modal from '../ui/Modal';
-import { getDrugByNDC, DrugDetail } from '../../lib/drugApi';
+import Modal from '@/app/components/ui/Modal';
+import { getDrugByNDC, DrugDetail } from '@/app/lib/drugApi';
 
 type NotesModalProps = {
     isOpen: boolean;
@@ -28,7 +28,7 @@ export default function NotesModal({ isOpen, onClose, name, note, dnc }: NotesMo
         if (dnc) {
             setIsLoadingDetails(true);
             setDetailsError(false);
-            
+
             getDrugByNDC(dnc)
                 .then((details) => {
                     if (details) {
@@ -57,9 +57,9 @@ export default function NotesModal({ isOpen, onClose, name, note, dnc }: NotesMo
         >
             <div className="space-y-4">
                 <div>
-                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Notes</h3>
+                    <h3 className="detail-modal-title">Notes</h3>
                     {note ? (
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <div className="detail-modal-note-wrapper">
                             <p className="text-sm text-gray-700 whitespace-pre-wrap">
                                 {note}
                             </p>
@@ -70,46 +70,34 @@ export default function NotesModal({ isOpen, onClose, name, note, dnc }: NotesMo
                 </div>
 
                 <div>
-                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Medication Details</h3>
-                    
-                    {!dnc || detailsError || !medicationDetails  ? (
-                        <p className="text-sm text-gray-500 italic">No details available</p>
-                    ) : isLoadingDetails ? (
-                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 flex items-center gap-3">
-                            <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                            <p className="text-sm text-blue-700">Loading medication details...</p>
+                    <h3 className="detail-modal-title">Medication Details</h3>
+
+                    <div className="text-xs text-gray-500 italic mb-2 text-wrap">
+                        *Note: The information provided below is for general reference only and should not be construed as medical advice.
+                    </div>
+
+                    {isLoadingDetails ? (
+                        <LoadingSkeleton />
+                    ) : medicationDetails && dnc && !detailsError ? (
+                        <div className="detail-modal-note-wrapper">
+                            <MedicationDetailSection
+                                title="Route"
+                                content={medicationDetails.route || []}
+                            />
+
+                            <MedicationDetailSection
+                                title="Dosage & Administration"
+                                content={medicationDetails.dosage_and_administration || []}
+                            />
+
+                            <MedicationDetailSection
+                                title="⚠️ Do Not Use"
+                                content={medicationDetails.do_not_use || []}
+                                titleColor="text-red-600"
+                            />
                         </div>
                     ) : (
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
-                            {medicationDetails.route && medicationDetails.route.length > 0 && (
-                                <div>
-                                    <p className="text-xs font-semibold text-gray-600 uppercase">Route</p>
-                                    <p className="text-sm text-gray-800">{medicationDetails.route.join(', ')}</p>
-                                </div>
-                            )}
-
-                            {medicationDetails.dosage_and_administration && medicationDetails.dosage_and_administration.length > 0 && (
-                                <div>
-                                    <p className="text-xs font-semibold text-gray-600 uppercase mb-1">Dosage & Administration</p>
-                                    <div className="text-sm text-gray-800 space-y-1 max-h-40 overflow-y-auto">
-                                        {medicationDetails.dosage_and_administration.map((item, index) => (
-                                            <p key={index} className="whitespace-pre-wrap">{item}</p>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {medicationDetails.do_not_use && medicationDetails.do_not_use.length > 0 && (
-                                <div>
-                                    <p className="text-xs font-semibold text-red-600 uppercase mb-1">⚠️ Do Not Use</p>
-                                    <div className="text-sm text-red-700 space-y-1 max-h-40 overflow-y-auto bg-red-50 p-2 rounded">
-                                        {medicationDetails.do_not_use.map((item, index) => (
-                                            <p key={index} className="whitespace-pre-wrap">{item}</p>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                        <p className="text-sm text-gray-500 italic">No details available</p>
                     )}
                 </div>
 
@@ -123,5 +111,45 @@ export default function NotesModal({ isOpen, onClose, name, note, dnc }: NotesMo
                 </div>
             </div>
         </Modal>
+    );
+}
+
+type MedicationDetailSectionProps = {
+    title: string;
+    content: string[];
+    titleColor?: string;
+};
+
+function MedicationDetailSection({
+    title,
+    content,
+    titleColor = "text-gray-600",
+}: MedicationDetailSectionProps) {
+    if (!content || content.length === 0) {
+        return null;
+    }
+
+    return (
+        <div>
+            <p className={`text-xs font-semibold ${titleColor} uppercase mb-1`}>
+                {title}
+            </p>
+            <div className={`text-sm text-gray-800 space-y-1 max-h-40 overflow-y-auto`}>
+                {content.map((item, index) => (
+                    <p key={index} className="whitespace-pre-wrap">
+                        {item}
+                    </p>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function LoadingSkeleton() {
+    return (
+        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 flex items-center gap-3">
+            <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+            <p className="text-sm text-blue-700">Loading medication details...</p>
+        </div>
     );
 }
