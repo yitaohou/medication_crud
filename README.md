@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Medication CRUD Application
 
-## Getting Started
+A web application for tracking and managing medication schedules, refill dates, and dosage information.
 
-First, run the development server:
+## Run Instructions
 
-```bash
+1. Install dependencies:
+npm install
+
+2. Start the development server:
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Open http://localhost:3000 in your browser to view the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Features
 
-## Learn More
+- add new medications with form validation
+- view medication list
+- edit existing medication
+- delete medications
+- mark dosage as taken or missed
+- show the start date and refill date for each medication
+- show the dosage frequency for each medication
+- show the total dosage and remaining dosage for each medication
+- show the refill status for each medication
+- automatic calculation of refill dates based on usage and frequency
+- Progress tracking for taken vs missed doses
+- adherence percentage for missed doses vs supposed to be taken doses
+- badges for expired and expiring medications
+- warning for expired medications (banner)
+- view a list of expired medications (modal)
+- warning for expiring medications (banner)
+- view a list of expiring medications (modal)
 
-To learn more about Next.js, take a look at the following resources:
+## Bonus Features
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- export the schedule to a csv/pdf file
+- use FDA API for medication search (auto-complete search bar with debounce)
+- local storage for persistent data
+- show medication details from FDA database (modal)
+- reset all medications functionality
+- event subscription for medication changes for banner/medication list
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## TODO
 
-## Deploy on Vercel
+- bug-to-be-fixed: editing the medication after hitting 'take' or 'miss' is broken
+- responsive design
+- do the dosage condition for each day? e.g. 3 times per day medication, then the user is able to mark any of them as taken or missed
+- migration to the tanstack query
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## API Endpoints
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Medications
+
+- GET /api/medications - Get all medications
+- POST /api/medications - Create a new medication
+- GET /api/medications/[id] - Get a single medication
+- PUT /api/medications/[id] - Update a medication
+- DELETE /api/medications/[id] - Delete a medication
+- POST /api/medications/[id]/take - Mark medication as taken
+- POST /api/medications/[id]/miss - Mark medication as missed
+- GET /api/medications/count - Get the count of medications
+- GET /api/medications/expired - Get expired medications
+- GET /api/medications/expiring - Get expiring medications
+- POST /api/medications/reset - Reset all medications
+- POST /api/medications/restore - Restore medications from local storage
+
+### External API
+
+- FDA OpenFDA Drug API - Fetch medication details by NDC code
+
+## Technology Stack
+
+- Next.js 14
+- TypeScript
+- Tailwind CSS
+- jsPDF (PDF export)
+- Local storage for data persistence
