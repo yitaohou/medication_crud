@@ -47,7 +47,7 @@ npm run dev
 - adding reset today's take/miss functionality
 - responsive design
 - do the dosage condition for each day? e.g. 3 times per day medication, then the user is able to mark any of them as taken or missed
-- migration to the tanstack query
+- migration to the tanstack query (technically the autocomplete is broken, since the racing condition, aka without abort controller, and no caching as well, but this should be solved after react query, and the code should be much cleaner)
 - validation checks for modification EP?
 
 ## API Endpoints
@@ -73,7 +73,7 @@ npm run dev
 
 ## Technology Stack
 
-- Next.js 14
+- Next.js 15.5
 - TypeScript
 - Tailwind CSS
 - jsPDF (PDF export)
